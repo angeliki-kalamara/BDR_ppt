@@ -1,0 +1,12 @@
+name: "BDR_ppt"
+output_dir: "docs"
+navbar:
+  title: "BDR presentation"
+  left:
+  - text: "BDR"
+   href: BDR_AK_presentation.html
+  - text: "Angeliki Kalamara"
+   href: speed-and-distance.html
+output:
+  html_document:
+ theme: cosmo
