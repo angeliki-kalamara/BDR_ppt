@@ -1,0 +1,165 @@
+---
+title: "Big Data Republic"
+subtitle: "Tanzanian Ministry Water pumps"
+author: "Angeliki Kalamara, PhD"
+#institute: ""
+date: "08/10/2021"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+```{css echo=FALSE}
+.darkblue {
+  color: #1A5B8B;
+}
+
+.remark-slide-content > h1 {   font-size: 33px;   margin-top: -80px; }
+```
+
+```{r include=FALSE, message=FALSE}
+library(dplyr)
+library(highcharter)
+
+df_wp_set=read.csv('water_pump_set.csv',header = T)
+df_wp_labels=read.csv('water_pump_labels.csv',header=T)
+
+df_merged = merge(df_wp_set,df_wp_labels,by='id')
+```
+
+
+# Problem statement
+
+Tanzanian Ministry of Water is interested in improving the maintenance of the Tanzanian water pumps. 
+
+**The objective is to develop a reproducible model that can predict the failure of the pumps in the future.**
+
+--
+
+*Suggestion for deployment of the model acts as bonus!*
+
+---
+# Dataset
+
+.pull-left[
+- 59,400 rows (unique pumps)
+- 41 column (features)
+- **'status_group'** target variable
+    - 'functional'
+    - 'functional, needs repair'
+    - 'non-functional'
+- 9 numerical features (id dropped) and 31 categorical features (target variable included).
+]
+
+.pull-right[
+```{r echo=FALSE, message=FALSE, out.width = '2000px', out.height = '400px'}
+df_status_pump = df_merged %>% group_by(status_group) %>% summarise(n=n()) %>% as.data.frame()
+df_status_pump = df_status_pump %>% mutate(perc = paste0(round(n/nrow(df_merged) * 100,2),'%'))
+
+library(ggplot2)
+ggplot(df_status_pump, aes(x=status_group, y=n, fill = status_group)) +
+    geom_bar(stat="identity", width=0.6)+
+    geom_text(aes(label=paste0(n,' (',perc,')')), 
+              position=position_dodge(width=0.2), hjust=0.5, vjust=-0.5, size=5) + 
+    scale_fill_manual(values=c('#42A0E8','#F2A808', 'gray')) + ggtitle('Pump status')+
+    labs(fill='Pump Status') +
+    theme_minimal() + 
+    expand_limits(y=c(0, 33000)) +
+    theme(
+        title=element_text(face='bold'),
+        legend.position = 'top',
+        legend.text = element_text(size=13),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.text.x=element_text(size=15,angle=45,hjust=0.9,vjust=0.9,face='bold'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+    )
+```
+]
+
+---
+# Data Preprocessing (1): Drop features
+
+- Transform 'date_recorded' to mumeric (months passed untill 01/-1-2021) and drop it
+- Drop 'recorded_by' (only 'GeoData Consultants Ltd') hence not very informative for the model
+- Drop 'wpt_name' (waterpoint name) and 'num_private' as for the latter feature no explanation is provided in the data set legend and contains only numbers
+
+---
+
+# Data Preprocessing (2): Group features
+
+Group features by dropping the ones with similar values. Many categorical feature are very similar to each other; in this case we keep the most informative afer visual inspection.
+
+A. Extraction type ('extraction_type', 'extraction_type_group', **'extraction_type_class'**): latter is more coincise
+
+B. Quantity (**'quantity'**, 'quantity_group'): exactly the same
+
+C. Payment ('payment', **'payment_type'**): exactly the same
+
+D. Waterpoint type ('waterpoint_type', **'waterpoint_type_group'**): better/less redundant categorization (communal standpipe + communal standpipe multiple together in one category)
+
+E. Management (**'management'**, 'management_group'): latter appears very generic; first provides a little more info; management of the waterpoint is critical as it can directly contribute to failure.
+
+F. Source (**'source'**, 'source_type', 'source_class'): could be important feature for predicting pump failure; 'source' was kept as sufficiently descriptive.
+
+
+<i><span class="darkblue">The features in <b>bold</b> are the ones kept to be used to build the predictive model.</span></i>
+
+---
+
+#  Data Preprocessing (3): Handle 0's
+
+Handle O's in the dataset:
+
+- Construction year; replace 0 values with median construction year
+- Population - has lots of zeros (aka NAs); replace with median polulation
+
+---
+
+# Data Preprocessing (4): Handle NULL/NA values
+
+```{r echo=FALSE}
+xx = sapply(colnames(df_merged), function(x) {
+    which(df_merged[,x] == '') %>% length
+})
+
+xx = xx[xx!=0] %>% sort
+df_null = data.frame(feature = names(xx), num_null = as.numeric(xx))
+
+knitr::kable(df_null, format = 'html')
+```
+
+Drop these features
+---
+
+# Spread of water pumps in Tanzania
+
+```{r echo=FALSE, message=FALSE}
+library(viridisLite)
+library(highcharter)
+library(dplyr)
+df_pump_per_region = df_merged %>% group_by(region) %>% summarise(total=n()) %>% as.data.frame()
+
+mapdata <- download_map_data("https://code.highcharts.com/mapdata/countries/tz/tz-all.js")
+
+highchart() %>%
+  hc_add_series_map(mapdata, df_pump_per_region, name = "Water Pumps",
+                    value = "total", joinBy = c("woe-name", "region"),
+                    dataLabels = list(enabled = TRUE, format = '{point.properties.name}'))
+```
+
+
