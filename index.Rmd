@@ -162,4 +162,8 @@ highchart() %>%
                     dataLabels = list(enabled = TRUE, format = '{point.properties.name}'))
 ```
 
+---
 
+# Baseline model
+
+Accuracy for baseline model is xxx%
