@@ -53,12 +53,16 @@ Tanzanian Ministry of Water is interested in improving the maintenance of the Ta
 
 .pull-left[
 - 59,400 rows (unique pumps)
+
 - 41 column (features)
+
 - **'status_group'** target variable
     - 'functional'
     - 'functional, needs repair'
     - 'non-functional'
 - 9 numerical features (id dropped) and 31 categorical features (target variable included).
+
+- Imbalanced dataset!
 ]
 
 .pull-right[
@@ -166,4 +170,122 @@ highchart() %>%
 
 # Baseline model
 
-Accuracy for baseline model is xxx%
+Multi-class problem
+
+.center[
+```{r echo=FALSE, message=FALSE, out.width = '500px', out.height = '460px'}
+df_status_pump = df_merged %>% group_by(status_group) %>% summarise(n=n()) %>% as.data.frame()
+df_status_pump = df_status_pump %>% mutate(perc = paste0(round(n/nrow(df_merged) * 100,2),'%'))
+
+library(ggplot2)
+ggplot(df_status_pump, aes(x=status_group, y=n, fill = status_group)) +
+    geom_bar(stat="identity", width=0.6)+
+    geom_text(aes(label=paste0(n,' (',perc,')')), 
+              position=position_dodge(width=0.2), hjust=0.5, vjust=-0.5, size=5) + 
+    scale_fill_manual(values=c('#42A0E8','#F2A808', 'gray')) + ggtitle('Pump status')+
+    labs(fill='Pump Status') +
+    theme_minimal() + 
+    expand_limits(y=c(0, 33000)) +
+    theme(
+        title=element_text(face='bold'),
+        legend.position = 'top',
+        legend.text = element_text(size=13),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.text.x=element_text(size=15,angle=45,hjust=0.9,vjust=0.9,face='bold'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+    )
+```
+]
+
+--
+
+Baseline model: 0.543 * 0.543 + 0.384 * 0.384 + 0.073 * 0.072 = 0.4473 (44.73% accuracy).
+
+---
+
+# Predictive model
+
+- Final dataset: 10 numerical and 10 categorical
+
+.pull-left[
+- amount_tsh
+- gps_height
+- longitude
+- latitude
+- region code
+- population
+- construction year
+- recorded date
+- decade
+]
+
+.pull-right[
+- basin
+- region
+- lga
+- extraction type group
+- management
+- payment type
+- extraction type class
+- water quality
+- quality group
+- quantity
+- source
+- waterpoint type group
+]
+
+---
+
+# Random Forest
+
+- Random Forest will be deployed (ensemble of trees)
+
+--
+
+    - suitable for large datasets (still can be complex; proper data preprocessing)
+--
+
+    - no special feature selection (but use with care!)
+    
+--
+
+    - robust to overfitting
+    
+--
+
+    - works well with non-linear data
+    
+--
+
+    - suitable for multi-classification problems
+    
+--
+
+---
+
+# Build model & accuracy
+
+- Random Forest (ensemble of trees)
+
+- One-Hot encoding will be used for the categorical data transformation
+
+--
+
+- Stratified split of the data into train and test sets. (70% training and 30% testing)
+
+
+    - Random Forest:  80.55% accuracy in 10.8secs
+
+    - Decision Tree 75.32% in 1.54 secs
+
+    - Random Forest optimized: 80.78% in ~4mimns.
+
+    
+    
+    
+    
