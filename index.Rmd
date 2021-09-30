@@ -168,6 +168,39 @@ highchart() %>%
 
 ---
 
+# Pump status functionality across Tanzania
+
+```{r echo=FALSE, message=FALSE}
+unfactor <- function(df){
+    #unfactor a data frame object
+    i <- sapply(df, is.factor)
+    df[i] <- lapply(df[i], as.character)
+    df
+}
+
+df_status_pump_per_region = df_merged %>% group_by(region, status_group) %>% summarise(n=n()) %>% as.data.frame() %>% unfactor()
+
+df_status_pump_per_region_class = df_status_pump_per_region %>% group_by(region) %>% top_n(1, n) %>% as.data.frame()
+df_status_pump_per_region_class = df_status_pump_per_region_class[,1:2]
+
+series <- df_status_pump_per_region_class %>% 
+  group_by(name = status_group) %>% 
+  do(data = list_parse(select(., region))) %>%
+  ungroup() %>% 
+  mutate(color = c("green", "gray"))
+
+highchart(type = "map") %>% 
+  hc_plotOptions(map = list(
+    allAreas = FALSE,
+    joinBy = c("woe-name", "region"),
+    dataLabels = list(enabled = TRUE, format = '{point.properties.name}'),
+    mapData = mapdata
+  )) %>% 
+  hc_add_series_list(series)
+```
+
+---
+
 # Baseline model
 
 Multi-class problem
@@ -212,31 +245,35 @@ Baseline model: 0.543 * 0.543 + 0.384 * 0.384 + 0.073 * 0.072 = 0.4473 (44.73% a
 
 - Final dataset: 10 numerical and 10 categorical
 
+- One-Hot encoding will be used for the categorical data transformation
+
 .pull-left[
-- amount_tsh
-- gps_height
-- longitude
-- latitude
-- region code
-- population
-- construction year
-- recorded date
-- decade
+Numerical:
+    - amount_tsh
+    - gps_height
+    - longitude
+    - latitude
+    - region code
+    - population
+    - construction year
+    - recorded date
+    - decade
 ]
 
 .pull-right[
-- basin
-- region
-- lga
-- extraction type group
-- management
-- payment type
-- extraction type class
-- water quality
-- quality group
-- quantity
-- source
-- waterpoint type group
+Categorical:
+    - basin
+    - region
+    - lga
+    - extraction type group
+    - management
+    - payment type
+    - extraction type class
+    - water quality
+    - quality group
+    - quantity
+    - source
+    - waterpoint type group
 ]
 
 ---
@@ -270,22 +307,109 @@ Baseline model: 0.543 * 0.543 + 0.384 * 0.384 + 0.073 * 0.072 = 0.4473 (44.73% a
 
 # Build model & accuracy
 
-- Random Forest (ensemble of trees)
-
-- One-Hot encoding will be used for the categorical data transformation
+- Random Forest OOB score: 79.7% and 80.4% (optimized)
 
 --
 
 - Stratified split of the data into train and test sets. (70% training and 30% testing)
 
+.center[
+```{r echo=FALSE, fig.height = 6, fig.width = 10}
+models = c('Baseline','Random Forest', 'Decision Tree', 'Random Forest opt.')
+acc = c(44.73,80.55, 75.32, 80.78)
+time = c(NA,10.8, 1.54, 241.8)
+df = data.frame(Models = models, accuracies = acc)
 
-    - Random Forest:  80.55% accuracy in 10.8secs
+ggplot(df, aes(x=models, y=accuracies, fill=models)) +
+    geom_bar(stat="identity", width=0.5)+
+    geom_text(aes(label=paste0(accuracies,'%',' (',time,' secs)')), 
+              position=position_dodge(width=0.2), hjust=0.5, vjust=-0.5, size=5) + 
+    scale_fill_manual(values=c('gray','#F2A808', 'lightblue', 'magenta4')) +
+    labs(fill='Models') +
+    theme_minimal() + 
+    theme(
+        title=element_text(face='bold'),
+        legend.position = 'top',
+        legend.text = element_text(size=13),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.text.x=element_text(size=15,angle=30,hjust=0.9,vjust=1,face='bold'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+    )
+```
+]
 
-    - Decision Tree 75.32% in 1.54 secs
+---
 
-    - Random Forest optimized: 80.78% in ~4mimns.
+# Important features
 
-    
-    
-    
-    
+- quantity water (dry)
+
+- location (longitude/latitude)
+
+- date recorded
+
+- waterpoint type group ('other' scored higher)
+
+- gps_height (altitude of the well)
+
+- construction year
+
+- population
+
+- amount_tsh (amount of water avalable to the waterpoint)
+
+- extraction type class ('other')
+---
+
+# Confusion Matrix
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/confusion_matrix.png")
+```
+
+---
+
+# Conclusion
+
+- Accuracy ~81% (36% increse from baseline model), weighted-F1 score 0.8
+
+--
+
+- Reasonable most important features e.g. with the water quantity features, the location, construction year and waterpoint type group.
+
+--
+
+- Powerful enough model ,without evidence of overfitting, that provides confidence for future predictions.
+
+--
+
+- Model deployed via in a user-friendly application
+
+---
+
+# Future Steps
+
+- Despite stratification in train/test splitting, imbalanced classes is a real-world issue
+
+- How to tackle this?
+
+    - Consult with the client :)
+        - more data
+        - merge classes 
+        
+    - Over-sample or under-sample (e.g SMOTE technique can improve OOB score in Random Forest from 79.7% to 86.4%)
+
+---
+
+# Model deployment
+
+---
+
+class: middle
+
+## Thank you!
