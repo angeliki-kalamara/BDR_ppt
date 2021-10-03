@@ -40,7 +40,7 @@ df_merged = merge(df_wp_set,df_wp_labels,by='id')
 
 # Problem statement
 
-- Water is crucial to human existence and lif
+- Water is crucial to human existence and life
 
 - Water shortage in Tanzania (https://projectzawadi.org/water-shortage/)
     - caused by population growth
