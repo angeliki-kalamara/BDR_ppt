@@ -477,7 +477,7 @@ class: middle
 # Model deployment (1)
 
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/app_01.png")
+knitr::include_graphics("index_files/figure-html/app_01.PNG")
 ```
 
 ---
@@ -485,7 +485,7 @@ knitr::include_graphics("index_files/figure-html/app_01.png")
 # Model deployment (2)
 
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/app_02.png")
+knitr::include_graphics("index_files/figure-html/app_02.PNG")
 ```
 
 ---
@@ -493,7 +493,7 @@ knitr::include_graphics("index_files/figure-html/app_02.png")
 # Model deployment (3)
 
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/app_03.png")
+knitr::include_graphics("index_files/figure-html/app_03.PNG")
 ```
 
 ---
@@ -501,7 +501,7 @@ knitr::include_graphics("index_files/figure-html/app_03.png")
 # Model deployment (4)
 
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/app_04.png")
+knitr::include_graphics("index_files/figure-html/app_04.PNG")
 ```
 
 ---
@@ -509,7 +509,7 @@ knitr::include_graphics("index_files/figure-html/app_04.png")
 # Model deployment (5)
 
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/app_05.png")
+knitr::include_graphics("index_files/figure-html/app_05.PNG")
 ```
 
 ---
