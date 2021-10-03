@@ -329,8 +329,6 @@ Categorical:
 
     - suitable for multi-classification problems
     
---
-
 ---
 
 # Build model & accuracy
@@ -342,7 +340,7 @@ Categorical:
 - Stratified split of the data into train and test sets. (70% training and 30% testing)
 
 .center[
-```{r echo=FALSE, fig.height = 6, fig.width = 10}
+```{r echo=FALSE, fig.height = 7, fig.width = 10}
 models = c('Baseline','Random Forest', 'Decision Tree', 'Random Forest opt.')
 acc = c(44.73,80.55, 75.32, 80.78)
 time = c(NA,10.8, 1.54, 241.8)
@@ -362,7 +360,7 @@ ggplot(df, aes(x=models, y=accuracies, fill=models)) +
         axis.title.x=element_blank(),
         axis.title.y=element_blank(),
         axis.text.y=element_blank(),
-        axis.text.x=element_text(size=15,angle=30,hjust=0.9,vjust=1,face='bold'),
+        axis.text.x=element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.y = element_blank(),
