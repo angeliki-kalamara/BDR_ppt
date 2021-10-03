@@ -265,7 +265,7 @@ ggplot(df_status_pump, aes(x=status_group, y=n, fill = status_group)) +
 
 --
 
-Baseline model: 0.543 * 0.543 + 0.384 * 0.384 + 0.073 * 0.072 = 0.4473 (44.73% accuracy).
+Baseline model: (0.543 x 0.543) + (0.384 x 0.384) + (0.073 x 0.072) = 0.4473 (44.73% accuracy).
 
 ---
 
