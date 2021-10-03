@@ -40,11 +40,16 @@ df_merged = merge(df_wp_set,df_wp_labels,by='id')
 
 # Problem statement
 
+- Water is crucial to human existence and lif
+
+- Water shortage in Tanzania (https://projectzawadi.org/water-shortage/)
+    - caused by population growth
+    - high level consumption
+    - climate change (e.g. water shortage is a big problem in dry season)
+
 Tanzanian Ministry of Water is interested in improving the maintenance of the Tanzanian water pumps. 
 
 **The objective is to develop a reproducible model that can predict the failure of the pumps in the future.**
-
---
 
 *Suggestion for deployment of the model acts as bonus!*
 
@@ -60,7 +65,7 @@ Tanzanian Ministry of Water is interested in improving the maintenance of the Ta
     - 'functional'
     - 'functional, needs repair'
     - 'non-functional'
-- 9 numerical features (id dropped) and 31 categorical features (target variable included).
+- 31 categorical features (target variable included), 7 nnumerical and 2 date features.
 
 - Imbalanced dataset!
 ]
@@ -96,17 +101,32 @@ ggplot(df_status_pump, aes(x=status_group, y=n, fill = status_group)) +
 ]
 
 ---
+
+# Business Model
+
+- Tanzanian Ministry of Water wants to decrease the overall cost of maintaining water pumps
+
+- Predicting **functional but needs repair** class:
+
+    - improves maintance operations of the water pumps
+    - water pump is fixed in time
+    - TMW does not spend money to fix functional pumps
+    - ensure clean, potable water
+
+---
 # Data Preprocessing (1): Drop features
 
 - Transform 'date_recorded' to mumeric (months passed untill 01/-1-2021) and drop it
+
 - Drop 'recorded_by' (only 'GeoData Consultants Ltd') hence not very informative for the model
+
 - Drop 'wpt_name' (waterpoint name) and 'num_private' as for the latter feature no explanation is provided in the data set legend and contains only numbers
 
 ---
 
 # Data Preprocessing (2): Group features
 
-Group features by dropping the ones with similar values. Many categorical feature are very similar to each other; in this case we keep the most informative afer visual inspection.
+Many categorical feature are very similar to each other; group them to reduce model complexity.
 
 A. Extraction type ('extraction_type', 'extraction_type_group', **'extraction_type_class'**): latter is more coincise
 
@@ -147,7 +167,8 @@ df_null = data.frame(feature = names(xx), num_null = as.numeric(xx))
 knitr::kable(df_null, format = 'html')
 ```
 
-Drop these features
+**Drop these features**
+
 ---
 
 # Spread of water pumps in Tanzania
@@ -161,9 +182,16 @@ df_pump_per_region = df_merged %>% group_by(region) %>% summarise(total=n()) %>%
 mapdata <- download_map_data("https://code.highcharts.com/mapdata/countries/tz/tz-all.js")
 
 highchart() %>%
-  hc_add_series_map(mapdata, df_pump_per_region, name = "Water Pumps",
-                    value = "total", joinBy = c("woe-name", "region"),
-                    dataLabels = list(enabled = TRUE, format = '{point.properties.name}'))
+    hc_add_series_map(mapdata, df_pump_per_region, name = "Water Pumps",
+                      value = "total", joinBy = c("woe-name", "region"),
+                      dataLabels = list(enabled = TRUE, format = '{point.properties.name}')) %>%
+    hc_mapNavigation(enabled = TRUE) %>%
+    hc_add_series(
+        data = dd_basins, 
+        type = "mappoint",
+        name = "Basins", 
+        color = "red"
+    ) 
 ```
 
 ---
@@ -355,7 +383,7 @@ ggplot(df, aes(x=models, y=accuracies, fill=models)) +
 
 - waterpoint type group ('other' scored higher)
 
-- gps_height (altitude of the well)
+- gps_height (altitude of the well) [**Absolute Water Pumps, 2019**](https://www.absolutewaterpumps.com/blog/how-altitude-affects-water-pump).
 
 - construction year
 
@@ -364,6 +392,38 @@ ggplot(df, aes(x=models, y=accuracies, fill=models)) +
 - amount_tsh (amount of water avalable to the waterpoint)
 
 - extraction type class ('other')
+
+---
+
+# Region and Contruction type
+
+.pull-left[
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/plot_pump_number_status_basin.png")
+```
+]
+
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/plot_pump_status_extraction_type.png")
+```
+]
+
+---
+
+# Construction Year & Caterpoint type
+
+.pull-left[
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/plot_pump_status_construstion_year.png")
+```
+]
+
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/plot_pump_number_status_watertype.png")
+```
+]
 ---
 
 # Confusion Matrix
@@ -404,9 +464,71 @@ knitr::include_graphics("index_files/figure-html/confusion_matrix.png")
         
     - Over-sample or under-sample (e.g SMOTE technique can improve OOB score in Random Forest from 79.7% to 86.4%)
 
+- Identify the life time of a pump (e.g. from manufacturer?) -> help TMW to repair them in time (before becoming non-functional).
+
+- No correlation between number of pumps and area population (r = -0.08); suggest to the TMW to tackle this
+
 ---
 
-# Model deployment
+class: middle
+
+## ***Bonus!***
+
+---
+
+# Model deployment (1)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_01.png")
+```
+
+---
+
+# Model deployment (2)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_02.png")
+```
+
+---
+
+# Model deployment (3)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_03.png")
+```
+
+---
+
+# Model deployment (4)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_04.png")
+```
+
+---
+
+# Model deployment (5)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_05.png")
+```
+
+---
+
+# Model deployment (6)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_06.png")
+```
+
+---
+
+# Model deployment (7)
+
+```{r echo=FALSE}
+knitr::include_graphics("index_files/figure-html/app_07.png")
+```
 
 ---
 
