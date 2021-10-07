@@ -181,6 +181,12 @@ df_pump_per_region = df_merged %>% group_by(region) %>% summarise(total=n()) %>%
 
 mapdata <- download_map_data("https://code.highcharts.com/mapdata/countries/tz/tz-all.js")
 
+dd_basins = df_merged[,c('longitude', 'latitude', 'basin')] %>% unique() 
+colnames(dd_basins) = c('lon','lat','name')
+
+dd_basins = dd_basins %>% group_by(name) %>% summarise(avg_lon = mean(lon), avg_lat = mean(lat)) %>% as.data.frame()
+colnames(dd_basins) = c('name','lon','lat')
+
 highchart() %>%
     hc_add_series_map(mapdata, df_pump_per_region, name = "Water Pumps",
                       value = "total", joinBy = c("woe-name", "region"),
@@ -397,7 +403,7 @@ ggplot(df, aes(x=models, y=accuracies, fill=models)) +
 
 .pull-left[
 ```{r echo=FALSE}
-knitr::include_graphics("index_files/figure-html/plot_pump_number_status_basin.png")
+knitr::include_graphics("index_files/figure-html/plot_pump_status_per_region.png")
 ```
 ]
 
