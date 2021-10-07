@@ -441,7 +441,7 @@ knitr::include_graphics("index_files/figure-html/confusion_matrix.png")
 
 # Conclusion
 
-- Accuracy ~81% (36% increse from baseline model), weighted-F1 score 0.8
+- Accuracy ~81% (36% increase from baseline model), weighted-F1 score 0.8
 
 --
 
