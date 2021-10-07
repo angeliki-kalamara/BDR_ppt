@@ -277,7 +277,7 @@ Baseline model: (0.543 x 0.543) + (0.384 x 0.384) + (0.073 x 0.072) = 0.4473 (44
 
 # Predictive model
 
-- Final dataset: 10 numerical and 10 categorical
+- Final dataset: 10 numerical and 12 categorical
 
 - One-Hot encoding will be used for the categorical data transformation
 
@@ -288,6 +288,7 @@ Numerical:
     - longitude
     - latitude
     - region code
+    - district code
     - population
     - construction year
     - recorded date
